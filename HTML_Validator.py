@@ -63,5 +63,5 @@ def _extract_tags(html):
             if (html[i] == ' ') & ('<' in html[:i]):
                 g = i
                 taglist.append(html[f:g] + '>')
-    return [k for k in taglist if (k.count('<') == 1) &
-            (k.count('>') == 1) & (' ' not in k)]
+    return [k for k in taglist if (k.count('<') == 1)
+            & (k.count('>') == 1) & (' ' not in k)]
