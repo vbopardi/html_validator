@@ -7,49 +7,61 @@ def validate_html(html):
     corresponding closing tag.
     '''
 
-    if type(html) == list:
-        html = ''.join(html)
-
     # Base case
     if len(html) == 0:
         return True
+
+    if type(html) == list:
+        html = ''.join(html)
+
+    # No closing tag
+    if '</' not in html:
+        return False
 
     # Run extract tags
     taglist = _extract_tags(html)
     stack = []
 
-    if taglist[0][0] == '<':
-        stack.append(taglist[0])
-        f = list(taglist[0])
-        f.insert(1, '/')
-        if f == list(taglist[-1]):
-            stack.pop()
-            return validate_html(taglist[1:-1])
-        elif f == list(taglist[1]):
-            stack.pop()
-            return validate_html(taglist[2:])
-        else:
-            return False
+    # If it has only one tag, false
+    if len(taglist) == 1:
+        return False
+
+    # closing cannot be first element in taglist
+    if '</' in taglist[0]:
+        return False
+
+    # All other cases
+    for i in range(len(taglist)):
+        if '</' not in taglist[i]:
+            stack.append(taglist[i])
+        elif '</' in taglist[i]:
+            f = list(stack[-1])
+            f.insert(1, '/')
+            if f == list(taglist[i]):
+                stack.pop()
+            else:
+                return False
+    return len(stack) == 0
 
 
 def _extract_tags(html):
     '''
     Extract HTML tags from string
     '''
-    l1 = []
-    l2 = []
+    taglist = []
     if len(html) == 0:
-        return l2
+        return taglist
     elif '<' not in html:
-        return l2
+        return taglist
     else:
         for i in range(len(html)):
             if html[i] == '<':
-                for j in range(i, len(html)):
-                    if html[j] == '>':
-                        l1.append(html[i:j + 1])
-        for i in range(len(l1)):
-            if l1[i].count('<') == 1:
-                l2.append(l1[i])
-
-        return l2
+                f = i
+            if html[i] == '>':
+                e = i
+                taglist.append(html[f:e + 1])
+            if (html[i] == ' ') & ('<' in html[:i]):
+                g = i
+                taglist.append(html[f:g] + '>')
+    return [k for k in taglist if (k.count('<') == 1) &
+            (k.count('>') == 1) & (' ' not in k)]
